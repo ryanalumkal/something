@@ -5,6 +5,10 @@ Provides face mesh with 468 landmarks, head pose estimation, and gaze tracking
 from typing import Optional, Callable, List
 from dataclasses import dataclass
 import logging
+import threading
+import time
+import cv2
+import numpy as np
 
 try:
     import mediapipe as mp
@@ -69,6 +73,7 @@ class MediaPipeVisionService:
         self.cap = None
         self._camera_thread = None
         self._running = False
+        self.debug_frame = None
 
         # MediaPipe Face Mesh
         self.mp_face_mesh = mp.solutions.face_mesh
@@ -150,10 +155,11 @@ class MediaPipeVisionService:
 
         while self._running:
             ret, frame = self.cap.read()
-            self.debug_frame = frame.copy()
             if not ret:
                 time.sleep(0.1)
                 continue
+            
+            self.debug_frame = frame.copy()
 
             # MediaPipe requires RGB
             rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -285,11 +291,9 @@ class MediaPipeVisionService:
         # Decision threshold: Adjust according to resolution. About 30px at 320x240, about 60px at 640x480
         # Dynamic threshold relative to palm size can also be used, but fixed threshold is simplest and effective
         PINCH_THRESHOLD_PX = 40
-        is_pinching = distance_px < PINCH_THRESHOLD_PX# and fingers_up == [1,1,0,0,0]
+        is_pinching = distance_px < PINCH_THRESHOLD_PX  # and fingers_up == [1,1,0,0,0]
 
-        gesture = None
-        if is_pinching:
-            gesture = "Pinch"
+        gesture = "Pinch" if is_pinching else "None"
 
         return MediaPipeHandData(
             detected=True,
@@ -298,6 +302,8 @@ class MediaPipeVisionService:
             gesture=gesture,
             fingers_up=fingers_up,
             timestamp=time.time(),
+            is_pinching=is_pinching,
+            pinch_distance=norm_distance,
             landmarks=all_landmarks
         )
 

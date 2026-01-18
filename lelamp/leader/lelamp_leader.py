@@ -182,7 +182,7 @@ class LeLampLeader(Teleoperator):
 
     def disconnect(self) -> None:
         if not self.is_connected:
-            DeviceNotConnectedError(f"{self} is not connected.")
+            raise DeviceNotConnectedError(f"{self} is not connected.")
 
         self.bus.disconnect()
         logger.info(f"{self} disconnected.")

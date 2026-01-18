@@ -281,7 +281,7 @@ class VisionService:
                     self.logger.error(f"Error in tracking callback: {e}")
 
             # Motor Direct Tracking
-            if self._motor_tracking_enabled and self._motor_tracking_callback:
+            if self._motor_tracking_enabled and self._motor_tracking_callback and face_data:
                 try:
                     self._motor_tracking_callback(face_data.position[0], face_data.position[1], face_data.detected)
                 except Exception as e:
