@@ -4,6 +4,7 @@ import shutil
 import threading
 import uuid
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 # Import your services (from the files you uploaded)
 from backend.fast_track import FastTrackService
@@ -11,6 +12,7 @@ from backend.slow_track import SlowTrackService
 from backend.router import RouterService
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for frontend communication
 
 # Initialize
 fast_track = FastTrackService()

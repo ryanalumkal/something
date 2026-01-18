@@ -1,7 +1,8 @@
 flask
+flask-cors
 python-dotenv
 requests
 twelvelabs>=0.4.0
 google-generativeai
 pillow
-# backboard-sdk (Include this only if you have the local wheel/file)
+backboard-sdk
