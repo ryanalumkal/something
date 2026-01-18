@@ -360,10 +360,12 @@ class LLM_groq:
             message = chat_completion.choices[0].message
             logger.info(f"LLM response received: {message}")
         except Exception as e:
-            logger.critical(f"Error{e}")
+            logger.critical(f"Error {e}")
+            return  # Return early if error occurred, message is not defined
+        
         # Check if tools called
         if message.tool_calls:
-            logger.info(f"LLM Calling {len(message.tool_calls) }tools...")
+            logger.info(f"LLM Calling {len(message.tool_calls)} tools...")
 
             # 4. Execute tools sequentially
             for tool_call in message.tool_calls:
@@ -392,7 +394,7 @@ class LLM_groq:
             )
             final_response = final_completion.choices[0].message.content
             self.chat_history.append({"role": "assistant", "content": final_response})
-            logger.info(f"Final response: {message.content}")
+            logger.info(f"Final response: {final_response}")
             return final_response
 
         else:
