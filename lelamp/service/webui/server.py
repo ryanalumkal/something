@@ -307,6 +307,17 @@ def create_webui_app():
     return create_api(vision_service=g.vision_service)
 
 
+def _is_port_available(port: int) -> bool:
+    """Check if a port is available for binding."""
+    import socket
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        try:
+            sock.bind(('0.0.0.0', port))
+            return True
+        except OSError:
+            return False
+
+
 def start_webui_server() -> threading.Thread:
     """Start WebUI server in background thread."""
     if not g.CONFIG.get('webui', {}).get('enabled', True):
@@ -318,10 +329,28 @@ def start_webui_server() -> threading.Thread:
     init_hardware_services()
 
     port = g.CONFIG.get('webui', {}).get('port', 8080)
+    original_port = port
+    
+    # Check if port is available, fall back to 8080 if 80 is in use
+    if port == 80 and not _is_port_available(port):
+        logger.warning(f"Port {port} is already in use, falling back to port 8080")
+        port = 8080
+    
+    # Verify fallback port is available
+    if not _is_port_available(port):
+        logger.error(f"Port {port} is also in use. Please free up a port or change the webui.port config.")
+        raise RuntimeError(f"Cannot bind to port {port} - address already in use")
+
     app = create_webui_app()
 
     def run_server():
-        uvicorn.run(app, host="0.0.0.0", port=port, log_level="warning")
+        try:
+            uvicorn.run(app, host="0.0.0.0", port=port, log_level="warning")
+        except OSError as e:
+            if "address already in use" in str(e).lower():
+                if port != 8080 and original_port == 80:
+                    logger.error(f"Port {port} became unavailable. Try restarting or check for conflicting processes.")
+            raise
 
     thread = threading.Thread(target=run_server, daemon=True)
     thread.start()
