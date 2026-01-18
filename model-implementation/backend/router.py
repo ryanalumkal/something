@@ -5,27 +5,42 @@ from backend.config import Config
 class RouterService:
     def __init__(self):
         self.bb_client = BackboardClient(api_key=Config.BACKBOARD_API_KEY)
-        
-        # We assume you created an assistant in the Backboard Dashboard
-        # named "Hackathon_DJ" that uses Claude 3.5 Sonnet.
-        # This is easier than creating it in code every time.
-        self.assistant_id = "asst_..." # Replace with ID from Dashboard
+        self.assistant_id = Config.BACKBOARD_ASSISTANT_ID
 
     def get_music_recommendation(self, visual_vibe, user_identity_context):
         """
-        Uses Backboard (and your $10 credits) to ask Claude for advice.
+        Uses Backboard to route the prompt to Claude (or whatever model you chose in the dashboard).
+        This uses your $10 credits, not a credit card.
         """
         prompt = (
-            f"Context: User is reading a comic. \n"
-            f"Visuals: {visual_vibe}. \n"
-            f"User History: {user_identity_context}. \n"
-            f"Task: Pick a specific song genre and tempo."
+            f"Context: The user is reading a comic. \n"
+            f"Visual Vibe: {visual_vibe}. \n"
+            f"User Identity/History: {user_identity_context}. \n"
+            f"Task: Recommend a music genre and tempo. Output ONLY the genre and tempo."
         )
 
-        # This call costs ~$0.01 of your $10 credits
-        response = self.bb_client.add_message(
-            assistant_id=self.assistant_id,
-            content=prompt
-        )
-        
-        return response.content
+        try:
+            # Send message to the specific Assistant (Claude 3.5 Sonnet)
+            response = self.bb_client.add_message(
+                assistant_id=self.assistant_id,
+                content=prompt
+            )
+            # Return the text response
+            return response.content
+        except Exception as e:
+            print(f"Backboard Router Error: {e}")
+            return "Synthwave, Medium Tempo" # Fallback if API fails
+            
+    def update_identity_memory(self, insight):
+        """
+        Stores a new fact about the user in Backboard's long-term memory.
+        """
+        try:
+            self.bb_client.add_message(
+                assistant_id=self.assistant_id,
+                content=f"MEMORY UPDATE: {insight}"
+            )
+            return True
+        except Exception as e:
+            print(f"Memory Update Error: {e}")
+            return False
