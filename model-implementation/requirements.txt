@@ -10,4 +10,8 @@ anthropic==0.18.1           # Claude 3.5 Sonnet (Reasoning)
 google-generativeai==0.8.6  # Gemini 1.5 Flash (Fast Vision)
 
 # --- Utilities ---
+<<<<<<< HEAD
 pillow              # Image processing (needed for Gemini/Base64 handling)
+=======
+pillow       # Image processing (needed for Gemini/Base64 handling)
+>>>>>>> 31b8fa14b26ee5a4e93160e2fcabf85836f7aa54
