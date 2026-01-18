@@ -1,0 +1,315 @@
+agent:
+  enabled: false
+auth:
+  clerk_publishable_key: pk_test_ZXhhY3QtcGVnYXN1cy00Ni5jbGVyay5hY2NvdW50cy5kZXYk
+  enabled: true
+  local_bypass: false
+datacollection:
+  audio_collection: false
+  collection_interval_seconds: 60
+  enabled: false
+  hub_url: http://192.168.10.10:8000
+  upload_interval_seconds: 300
+  user_consent: false
+  video_collection: false
+device:
+  hub_url: null
+  memory_mb: null
+  pi_version: null
+  registered: false
+  serial: null
+  user_linked: false
+endpointing:
+  max_delay: 6.0
+  min_consecutive_speech_delay: 0.5
+  min_delay: 0.8
+face_tracking:
+  camera_index: /dev/usbcam
+  enabled: false
+  engine: opencv
+  fps: 10
+  mediapipe:
+    min_detection_confidence: 0.7
+    min_tracking_confidence: 0.7
+  motion:
+    dead_zone: 4.0
+    max_speed: 4.0
+    scale: 0.28
+    smoothing: 0.6
+  resolution:
+  - 320
+  - 240
+id: lelamp
+language: en
+location:
+  city: Toronto
+  country: Canada
+  lat: 43.6532
+  lon: -79.3832
+  region: Ontario
+  timezone: America/Toronto
+mic_ready_sound: assets/AudioFX/Effects/Scifi-Success.mp3
+microphone:
+  audio_routing_enabled: false
+  barge_in_threshold: 0.45
+  debug_logging: false
+  debug_transcription: false
+  echo_gate_threshold: 0.03
+  filter_garbage_transcription: true
+  gate_release_time: 1.5
+  local_vad_threshold: 0.65
+  server_silence_duration_ms: 600
+  server_vad_threshold: 0.75
+  vad_mode: local
+microphone_volume: 50
+modifiers:
+  breathing:
+    amplitude: 2.0
+    enabled: false
+    frequency: 0.2
+  music:
+    amplitude: 12.0
+    beat_divisor: 1.0
+    dance_threshold: 0.25
+    enabled: false
+    energy_threshold: 0.25
+    excited_threshold: 0.6
+    groove: 0.3
+    joint: wrist_pitch.pos
+    wave_spread: 0.08
+  sway:
+    amplitude: 8.0
+    enabled: false
+    frequency: 0.15
+  twitch:
+    amplitude: 3.0
+    enabled: false
+    max_interval: 10.0
+    min_interval: 3.0
+motor_preset: Normal
+motor_presets:
+  Gentle:
+    base_pitch:
+      d_coefficient: 16
+      p_coefficient: 10
+      torque_limit: 350
+    base_yaw:
+      d_coefficient: 12
+      p_coefficient: 8
+      torque_limit: 300
+    default:
+      d_coefficient: 10
+      i_coefficient: 0
+      p_coefficient: 8
+      torque_limit: 250
+    elbow_pitch:
+      d_coefficient: 10
+      p_coefficient: 8
+      torque_limit: 280
+    wrist_pitch:
+      d_coefficient: 8
+      p_coefficient: 6
+      torque_limit: 120
+    wrist_roll:
+      d_coefficient: 8
+      p_coefficient: 6
+      torque_limit: 120
+  Normal:
+    base_pitch:
+      d_coefficient: 35
+      p_coefficient: 18
+      torque_limit: 550
+    base_yaw:
+      d_coefficient: 28
+      p_coefficient: 14
+      torque_limit: 450
+    default:
+      d_coefficient: 32
+      i_coefficient: 0
+      p_coefficient: 16
+      torque_limit: 500
+    elbow_pitch:
+      d_coefficient: 32
+      p_coefficient: 16
+      torque_limit: 500
+    wrist_pitch:
+      d_coefficient: 24
+      p_coefficient: 12
+      torque_limit: 350
+    wrist_roll:
+      d_coefficient: 24
+      p_coefficient: 12
+      torque_limit: 350
+  Sport:
+    base_pitch:
+      d_coefficient: 70
+      p_coefficient: 35
+      torque_limit: 1000
+    base_yaw:
+      d_coefficient: 56
+      p_coefficient: 28
+      torque_limit: 900
+    default:
+      d_coefficient: 64
+      i_coefficient: 0
+      p_coefficient: 32
+      torque_limit: 1000
+    elbow_pitch:
+      d_coefficient: 64
+      p_coefficient: 32
+      torque_limit: 1000
+    wrist_pitch:
+      d_coefficient: 48
+      p_coefficient: 24
+      torque_limit: 700
+    wrist_roll:
+      d_coefficient: 48
+      p_coefficient: 24
+      torque_limit: 700
+motors:
+  auto_disable_on_error: true
+  enabled: true
+  lamp_id: lelamp
+  port: /dev/lelamp
+  voltage: 12.0
+mute_mic_while_speaking: true
+personality:
+  character_file: lelamp/personality/characters/lelamp.json
+  instructions_file: lelamp/personality/instructions.txt
+pipeline:
+  local:
+    history_length: 10
+    min_audio_length: 0.3
+    mute_mic_during_playback: true
+    ollama_model: llama3.2:3b
+    ollama_url: http://localhost:11434
+    piper_path: piper/piper
+    silence_duration: 0.5
+    silence_threshold: 0.01
+    voice: ryan-medium.onnx
+    voices_dir: piper/voices
+    whisper_compute: int8
+    whisper_model: tiny
+  type: livekit
+port: /dev/lelamp
+pushable_mode:
+  current_threshold: 100
+  hold_delay: 0.3
+  poll_rate: 30
+  position_threshold: 5
+  preset: Gentle
+  return_to_idle: true
+rgb:
+  default_animation: ripple
+  default_color:
+  - 0
+  - 0
+  - 150
+  enabled: true
+  force_driver: null
+  fps: 1
+  idle_timeout_seconds: 30
+  led_brightness: 25
+  led_channel: 0
+  led_count: 93
+  led_dma: 10
+  led_freq_hz: 800000
+  led_invert: false
+  led_pin: 10
+  rings:
+  - count: 32
+    end: 31
+    name: ring_6
+    start: 0
+  - count: 24
+    end: 55
+    name: ring_5
+    start: 32
+  - count: 16
+    end: 71
+    name: ring_4
+    start: 56
+  - count: 12
+    end: 83
+    name: ring_3
+    start: 72
+  - count: 8
+    end: 91
+    name: ring_2
+    start: 84
+  - count: 1
+    end: 92
+    name: ring_1
+    start: 92
+setup:
+  audio:
+    tested: false
+    type: ''
+  camera:
+    enabled: false
+    tested: false
+  current_step: null
+  first_boot: true
+  motor_controller:
+    port_detected: ''
+    udev_configured: false
+  motor_ids_configured: []
+  rgb:
+    tested: false
+  setup_complete: false
+  steps_completed:
+    audio: true
+    camera: false
+    environment: true
+    motor_calibration: false
+    motor_controller: true
+    motor_ids: false
+    motor_voltage: false
+    personality: false
+    rgb: false
+spotify:
+  device_name: HaloX
+  enabled: true
+  redirect_uri: https://halox.local:8888/api/v1/spotify/auth/callback
+vad:
+  activation_threshold: 0.45
+  min_silence_duration: 0.5
+  min_speech_duration: 0.15
+  music_threshold: 0.8
+vision:
+  camera_device: null
+  camera_type: auto
+  enabled: false
+  fps: 30
+  image_fps: 1.0
+  instructions: 'You can see through a camera. When asked "what do you see?" or similar
+    questions,
+
+    describe what you observe. Be concise. Don''t mention vision unless specifically
+    asked.
+
+    '
+  max_frame_size: 512
+  ollama:
+    analysis_interval: 5.0
+    enabled: true
+    inject_system_prompt: true
+    instructions_file: lelamp/service/vision/vision_instructions.txt
+    model: llava:7b
+    proactive_comments: true
+    url: http://192.168.10.60:11434
+  provider: gemini
+  publish_livekit_image: false
+  publish_livekit_video: false
+  resolution:
+  - 640
+  - 480
+volume: 50
+webui:
+  enabled: true
+  port: 80
+wifi:
+  ap_mode: false
+  configured: false
+  enabled: true
+  ssid: null
