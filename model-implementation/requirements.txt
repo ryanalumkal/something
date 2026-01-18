@@ -1,17 +1,7 @@
-# --- Core Frameworks ---
-flask==3.0.2                # The web server running on your Pi/Laptop
-python-dotenv==1.0.1        # To load API keys from .env file
-requests==2.31.0            # For making HTTP requests (WebGazer -> Backend)
-
-# --- AI SDKs (The "Model Switching" components) ---
-backboard-sdk==1.4.3        # Backboard.io (Memory & Router)
-twelvelabs==0.4.6           # Twelve Labs (Pegasus & Marengo)
-anthropic==0.18.1           # Claude 3.5 Sonnet (Reasoning)
-google-generativeai==0.8.6  # Gemini 1.5 Flash (Fast Vision)
-
-# --- Utilities ---
-<<<<<<< HEAD
-pillow              # Image processing (needed for Gemini/Base64 handling)
-=======
-pillow       # Image processing (needed for Gemini/Base64 handling)
->>>>>>> 31b8fa14b26ee5a4e93160e2fcabf85836f7aa54
+flask
+python-dotenv
+requests
+twelvelabs>=0.4.0
+google-generativeai
+pillow
+# backboard-sdk (Include this only if you have the local wheel/file)

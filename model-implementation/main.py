@@ -1,86 +1,102 @@
 # main.py
 import os
+import shutil
 import threading
-import base64
-from flask import Flask, request, jsonify, send_from_directory
+import uuid
+from flask import Flask, request, jsonify
+
+# Import your services (from the files you uploaded)
 from backend.fast_track import FastTrackService
 from backend.slow_track import SlowTrackService
 from backend.router import RouterService
 
-app = Flask(__name__, static_folder='frontend')
+app = Flask(__name__)
 
-# Initialize Services
-fast_service = FastTrackService()
-slow_service = SlowTrackService()
-router_service = RouterService()
+# Initialize
+fast_track = FastTrackService()
+slow_track = SlowTrackService()
+router = RouterService()
 
-# Global variable to store the latest "Identity" context
-user_context = "User likes balanced pacing and standard heroes."
+# Global Context State
+current_context = {
+    "narrative_pacing": "Normal",
+    "last_scene_context": "Start of story"
+}
 
-@app.route('/')
-def index():
-    return send_from_directory('frontend', 'index.html')
-
-# --- API ENDPOINTS ---
-
-@app.route('/api/analyze_page', methods=['POST'])
-def analyze_page():
-    """
-    Called when the user turns a page.
-    1. Fast Vibe Check (Gemini)
-    2. Smart Music Pick (Claude + Context)
-    """
-    data = request.json
-    image_data_b64 = data['image_b64'].split(",")[1] # Remove header
-    image_bytes = base64.b64decode(image_data_b64)
-
-    # 1. FAST TRACK: Get the Vibe
-    vibe = fast_service.analyze_vibe(image_bytes)
-    print(f"Gemini Vibe: {vibe}")
-
-    # 2. ROUTER: Get Music (using the global user_context)
-    music_recommendation = router_service.get_music_recommendation(vibe, user_context)
+# --- ROUTE 1: PAGE TURN (Called by Frontend/Comic Reader) ---
+@app.route('/page-turn', methods=['POST'])
+def on_page_turn():
+    if 'image' not in request.files:
+        return jsonify({"error": "No image uploaded"}), 400
     
-    return jsonify({
-        "vibe": vibe,
-        "music": music_recommendation
-    })
-
-@app.route('/api/track_gaze', methods=['POST'])
-def track_gaze():
-    """
-    Receives eye-tracking coordinates. 
-    Aggregates them to find 'Areas of Interest'.
-    """
-    data = request.json
-    # In a real implementation, you would accumulate these points.
-    # If a user stares at one point (x,y) for > 5 seconds, trigger the Slow Track.
+    file = request.files['image']
+    unique_id = str(uuid.uuid4())
+    temp_path = f"temp_{unique_id}.jpg"
+    file.save(temp_path)
     
-    # Mock Logic for Hackathon Demo:
-    if data.get('duration_on_target', 0) > 5000: # 5 seconds
-        # Spin up a thread to run Twelve Labs so we don't block the UI
-        threading.Thread(target=run_deep_analysis, args=("mock_panel_path.jpg",)).start()
+    try:
+        # 1. Fast Track (Vibe)
+        visual_vibe = fast_track.analyze_vibe(temp_path)
         
-    return jsonify({"status": "tracking"})
+        # 2. Slow Track (Visual Memory Check)
+        is_same_scene, score = slow_track.check_scene_continuity(temp_path)
+        
+        if is_same_scene:
+            scene_context = "Continuing previous scene."
+        else:
+            scene_context = "SCENE SWITCH DETECTED. New location/mood."
+            # Index this new scene for future memory
+            bg_path = f"bg_{unique_id}.jpg"
+            shutil.copy(temp_path, bg_path)
+            threading.Thread(target=slow_track.add_to_memory, args=(bg_path,)).start()
 
-def run_deep_analysis(image_path):
+        # Combine inputs for Router
+        full_context = f"{scene_context} Narrative Pacing: {current_context['narrative_pacing']}."
+        
+        # 3. Router (Music Recommendation)
+        music_rec = router.get_music_recommendation(visual_vibe, full_context)
+        
+        return jsonify({
+            "vibe": visual_vibe,
+            "context": full_context,
+            "music": music_rec
+        })
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+
+# --- ROUTE 2: PACING UPDATE (Called by recorder.py) ---
+@app.route('/update-pacing', methods=['POST'])
+def update_pacing():
     """
-    Background worker that updates the global identity context.
+    Receives video chunks from recorder.py
     """
-    global user_context
-    print("Running Deep Analysis (Twelve Labs)...")
+    if 'video' not in request.files:
+        return jsonify({"error": "No video uploaded"}), 400
+        
+    video = request.files['video']
+    temp_video_path = f"temp_video_{str(uuid.uuid4())}.mp4"
+    video.save(temp_video_path)
     
-    # 1. Marengo: Remember this visual
-    slow_service.remember_visual_focus(image_path, "High Interest")
+    def process_video_background(path):
+        # Call Pegasus (Slow Track) to analyze the video
+        result = slow_track.analyze_narrative_pacing(path)
+        # Update the global state
+        current_context["narrative_pacing"] = result
+        print(f"*** MEMORY UPDATED: {result} ***")
+        
+        # Cleanup
+        if os.path.exists(path):
+            os.remove(path)
+
+    # Run analysis in background so recorder.py doesn't wait
+    threading.Thread(target=process_video_background, args=(temp_video_path,)).start()
     
-    # 2. Update Global Context
-    new_insight = "User is currently fascinated by the Villain character."
-    user_context = new_insight
-    
-    # 3. Persist to Backboard
-    router_service.update_identity_memory(new_insight)
-    print(f"Context Updated: {user_context}")
+    return jsonify({"status": "Video received, analyzing in background..."})
 
 if __name__ == '__main__':
-    # Run on 0.0.0.0 to be accessible by the Pi if running on laptop
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(port=5000, debug=True)
